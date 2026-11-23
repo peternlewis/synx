@@ -4,6 +4,8 @@ Every packet should be interpretable in a vacuum with no information about the s
 Every packet should be loseable without critical failure. This means packets should not communicate a state change that affects future packets.
 
 # SX1280 Config
+
+```
 SF7
 812 kHz
 FEC 4/6
@@ -12,7 +14,7 @@ High Sensitivity Mode
 Tx Power = 12.5dBm
 No Hardware CRC
 16 Byte Packet
-
+```
 
 # General Theory of Operation
 Transmitter sends out packets at 40-50Hz. Each time the reciever gets a packet it responds with a packet.
@@ -24,20 +26,19 @@ If a reciever does not recieve packets for a given timeout period (not defined h
 ## Timing
 The transmitter sends out packets at a constant rate as defined by the Target Transmission Period.
 
-The reciever will need to transition to the next band before the transmitter begins sending it's packet on that band. If the reciever gets a packet it should transition immediately after sending it's response. If the reciever hasn't heard a packet, it should typically transition anyways based on the target transmission period under the assumption that it has dropped the packet (the time needed to transition bands is hardware dependent so left to specific implementations). 
+The reciever will need to transition to the next band before the transmitter begins sending it's packet on that band. If the reciever gets a packet it should transition immediately after sending it's response. If the reciever hasn't heard a packet, it should typically transition anyway based on the target transmission period under the assumption that it has dropped the packet (the time needed to transition bands is hardware dependent so left to specific implementations). 
 
 The reciever should synchronise it's internal clock with the transmitters based on when the reciever gets the packet, to ensure that it doesn't loose sync with the transmitter.
 
 ## Packets
 There are 4 main groups of packets:
- - Control signals
-    The transmitter tells the reciever what to do.
- - Logged Values
-    The reciever tells the transmitter what it's doing.
- - Settings
-    The transmitter configures how the reciever should behave.
- - Bind
-    The transmitter and reciever work out how to talk to each other.
+
+| Type | Description |
+|----|-----------|
+| Control Signals | The transmitter tells the receiver what to do. |
+| Logged Values | The receiver tells the transmitter what it's doing. |
+| Settings | The transmitter configures how the receiver should behave. |
+| Bind | The transmitter and receiver work out how to talk to each other. |
 
 Further details on how packets are implemented are available in Packets.md
 
@@ -54,26 +55,26 @@ During binding the reciever can be configured with or without telemetry. This al
 
 # Expected Values
 
-To enable transmitters to display in a standard way we expect some values.
+To enable transmitters to display in a standard way we expect some standard values.
 
 ## Expected Logged Values
 
 ### Battery Voltage
-Logged Value Index: 0
-Name: Vbat
-Type: Float 
-Size: 2 bytes
+
+| Logged Value Index | Name | Type | Size |
+|--------------------|------|------|------|
+| 0 | Vbat | Float | 2 Bytes |
 
 ## Expected Settings
 
-### Reciever Name
-Setting Index: 0
-Name: Rx Name
-Type: String 
-Size: 11 Bytes
+### Receiver Name
 
+| Setting Index | Name | Type | Size |
+|--------------------|------|------|------|
+| 0 | Rx Name | String | 11 Bytes |
 
 # Random Number Generator Usage
+
 See  Random Number Generator.md for description of the RNG we use. Since the RNG is based on state, it is critical that it is used in the exact order specified or the transmitter and reciever won't match.
 
 The RNG is seeded with the UID from the bind.
@@ -94,5 +95,5 @@ function shuffle_1_to_80():
 We then produce a target transmission period between 20 and 25ms as:
 
 ```
-period = 20 + 5 * next_u32() / (2^32 - 1)
+period = 20.0 + 5.0 * (float(next_u32()) / float(2^32 - 1))
 ```
